@@ -1,0 +1,23 @@
+# Dependencies & builds
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Environment files (keep only the examples)
+.env
+.env.*
+!.env.example
+
+# Runtime data
+backend/uploads/*
+!backend/uploads/.gitkeep
+logs/
+*.log
+
+# Editors & OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

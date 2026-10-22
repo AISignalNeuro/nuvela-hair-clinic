@@ -1,0 +1,62 @@
+/* Design tokens: Nuvela "Istanbul turquoise" palette */
+:root {
+  --c-ink: #0b1b2b;
+  --c-ink-2: #10283d;
+  --c-ink-3: #183a55;
+  --c-text: #13212f;
+  --c-muted: #5a6b7c;
+  --c-line: #e3e9ee;
+  --c-line-strong: #cfd9e0;
+  --c-bg: #fbfaf7;
+  --c-sand: #f6f0e7;
+  --c-mint: #eaf6f4;
+  --c-white: #ffffff;
+
+  --c-primary: #0e8a8f;
+  --c-primary-600: #0b7479;
+  --c-primary-700: #085d62;
+  --c-primary-300: #7fd6cf;
+  --c-primary-100: #dff3f1;
+
+  --c-gold: #c9a15a;
+  --c-gold-600: #a9823d;
+  --c-gold-300: #e7cfa0;
+  --c-gold-100: #f7eedc;
+
+  --c-whatsapp: #1fb855;
+  --c-danger: #c8463f;
+  --c-success: #1e9e6a;
+
+  --grad-brand: linear-gradient(135deg, #0e8a8f 0%, #2bb3a8 55%, #d9b26a 100%);
+  --grad-gold: linear-gradient(135deg, #e2c27f 0%, #c9a15a 50%, #a9823d 100%);
+  --grad-dark: radial-gradient(1200px 600px at 80% -10%, rgba(43, 179, 168, 0.28), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(201, 161, 90, 0.18), transparent 60%), linear-gradient(180deg, #0b1b2b 0%, #0f2638 100%);
+
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 34px;
+  --radius-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(11, 27, 43, 0.06);
+  --shadow-sm: 0 4px 14px -6px rgba(11, 27, 43, 0.12);
+  --shadow: 0 16px 40px -18px rgba(11, 27, 43, 0.25);
+  --shadow-lg: 0 34px 70px -28px rgba(11, 27, 43, 0.38);
+  --shadow-glow: 0 18px 40px -14px rgba(14, 138, 143, 0.55);
+  --shadow-gold: 0 16px 36px -14px rgba(169, 130, 61, 0.6);
+
+  --font-sans: "Plus Jakarta Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Fraunces", "IBM Plex Sans Arabic", Georgia, "Times New Roman", serif;
+
+  --header-h: 76px;
+  --container: 1220px;
+  --gutter: clamp(16px, 4vw, 32px);
+  --section-y: clamp(64px, 9vw, 120px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[dir="rtl"] {
+  --font-sans: "IBM Plex Sans Arabic", "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "IBM Plex Sans Arabic", "Fraunces", Georgia, serif;
+}
