@@ -4,7 +4,7 @@ import LanguageSwitcher from "../ui/LanguageSwitcher.jsx";
 import IstanbulSkyline from "../ui/IstanbulSkyline.jsx";
 import LocalizedLink from "../ui/LocalizedLink.jsx";
 import { useI18n } from "../../i18n/I18nProvider.jsx";
-import { SITE } from "../../content/shared/site.js";
+import { SITE, STUDIO } from "../../content/shared/site.js";
 import { whatsappLink } from "../../utils/contact.js";
 
 export default function Footer() {
@@ -89,6 +89,20 @@ export default function Footer() {
         <p className="footer-disclaimer">
           <Icon name="info" size={14} /> {t("footer.demo")} {t("footer.medical")}
         </p>
+      </div>
+
+      <div className="footer-credit">
+        <div className="container footer-credit-inner">
+          <span className="footer-credit-label">{t("footer.builtBy")}</span>
+          <a className="footer-credit-brand" href={STUDIO.url} target="_blank" rel="noopener">
+            <span className="footer-credit-mark" aria-hidden="true">R</span>
+            {STUDIO.name}
+          </a>
+          <a className="footer-credit-social" href={STUDIO.linkedin} target="_blank" rel="noopener" aria-label={`${STUDIO.name} LinkedIn`}>
+            <Icon name="linkedin" size={16} />
+            LinkedIn
+          </a>
+        </div>
       </div>
     </footer>
   );

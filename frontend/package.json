@@ -2,6 +2,11 @@
   "name": "nuvela-hair-clinic-frontend",
   "private": true,
   "version": "1.0.0",
+  "author": {
+    "name": "Renix.dev",
+    "url": "https://renix.dev/en"
+  },
+  "homepage": "https://aisignalneuro.github.io/nuvela-hair-clinic/",
   "type": "module",
   "scripts": {
     "dev": "vite",

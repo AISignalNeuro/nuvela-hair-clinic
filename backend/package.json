@@ -2,6 +2,11 @@
   "name": "nuvela-hair-clinic-api",
   "version": "1.0.0",
   "description": "REST API for the Nuvela Hair Clinic website: content, bookings, contact leads, OTP/Google auth and admin endpoints.",
+  "author": {
+    "name": "Renix.dev",
+    "url": "https://renix.dev/en"
+  },
+  "homepage": "https://aisignalneuro.github.io/nuvela-hair-clinic/",
   "main": "src/server.js",
   "type": "module",
   "engines": {

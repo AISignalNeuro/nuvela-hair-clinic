@@ -350,6 +350,7 @@ const ui = {
     rights: "Tüm hakları saklıdır.",
     demo: "Portfolyo demosu: Nuvela, ekibi, yorumları, fiyatları ve iletişim bilgileri kurgusaldır.",
     medical: "İçerikler yalnızca bilgilendirme amaçlıdır ve tıbbi muayenenin yerini tutmaz.",
+    builtBy: "Tasarım ve geliştirme",
   },
   notFound: {
     title: "Bu sayfa biraz yolunu kaybetti",

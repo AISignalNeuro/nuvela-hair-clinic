@@ -323,6 +323,71 @@
   margin-top: 3px;
 }
 
+.footer-credit {
+  position: relative;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.footer-credit-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  padding-block: 16px calc(16px + env(safe-area-inset-bottom));
+  font-size: 0.85rem;
+}
+
+.footer-credit-label {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.footer-credit-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 750;
+  color: #fff;
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+
+.footer-credit-brand:hover {
+  color: var(--c-primary-300);
+}
+
+.footer-credit-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--grad-brand);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  box-shadow: 0 6px 16px -6px rgba(43, 179, 168, 0.8);
+}
+
+.footer-credit-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.footer-credit-social:hover {
+  background: #0a66c2;
+  border-color: #0a66c2;
+  color: #fff;
+}
+
 /* --- Floating contact dock ------------------------------------------------- */
 .fab-dock {
   position: fixed;

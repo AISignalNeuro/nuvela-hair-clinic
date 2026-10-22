@@ -350,6 +350,7 @@ const ui = {
     rights: "All rights reserved.",
     demo: "Portfolio demo: Nuvela, its team, reviews, prices and contact details are fictional.",
     medical: "Content is for information only and does not replace a medical consultation.",
+    builtBy: "Designed & developed by",
   },
   notFound: {
     title: "This page took a little detour",

@@ -4,6 +4,12 @@ A full-stack, multilingual website for a (fictional) hair transplant clinic in I
 
 **Live demo:** https://aisignalneuro.github.io/nuvela-hair-clinic/
 
+**Designed & developed by [Renix.dev](https://renix.dev/en)** · [LinkedIn](https://www.linkedin.com/company/renix-dev/)
+
+![Nuvela home page](docs/screenshots/home-hero.jpg)
+
+**Contents:** [UI / UX & visual design](#ui--ux--visual-design) · [Database](#database) · [Features](#features) · [Project structure](#project-structure) · [Getting started](#getting-started) · [API](#api-overview) · [Deployment](#deployment) · [Credits](#credits)
+
 | | |
 |---|---|
 | **Languages** | English, Türkçe, العربية (full RTL) |
@@ -13,6 +19,239 @@ A full-stack, multilingual website for a (fictional) hair transplant clinic in I
 | **Hosting** | Frontend on GitHub Pages (static), API via Docker on any Node host |
 
 > Nuvela, its doctors, reviews, prices and contact details are fictional and exist only for this portfolio project.
+
+---
+
+## UI / UX & visual design
+
+### Design goals
+
+| Goal | How the interface answers it |
+|---|---|
+| **Trust before price** | Doctor-led messaging, licensing and guarantee badges, real recovery timelines, transparent package comparison and a visible demo/medical disclaimer |
+| **One clear next step** | Every page ends in a single primary action (free assessment) with WhatsApp as the secondary path; a floating contact dock stays one tap away |
+| **International patients** | Three languages with a native RTL layout for Arabic, localized prices, dates and country names via `Intl`, and travel-focused content (airports, hotel, interpreter) |
+| **Calm, premium feel** | Deep navy + Istanbul turquoise with a warm gold accent, generous whitespace, glass panels and an illustrated skyline instead of stock photos |
+| **Privacy by design** | Before/after results are SVG illustrations drawn from each case's data, so no patient photo is ever published |
+| **Fast on phones** | Mobile-first layouts, code-split routes, lazy locale bundles, no image payload for illustrations |
+
+### Design system
+
+![Design system: palette, gradient, radii and typography](docs/design/palette.svg)
+
+- **Tokens** live in [`frontend/src/styles/tokens.css`](frontend/src/styles/tokens.css): colors, gradients, radii (12 / 18 / 26 / 34 px), elevation and spacing.
+- **Typography:** Fraunces for display headings, Plus Jakarta Sans for interface text (full Turkish support), IBM Plex Sans Arabic for RTL pages.
+- **Components:** buttons (primary, gold, glass, ghost, WhatsApp), chips, badges, cards (service, case, package, journal, doctor), accordion, modal, drawer, toasts, before/after slider, breadcrumbs, language switcher.
+- **Iconography:** a hand-made 24 px line icon set; directional icons mirror automatically in RTL.
+- **Illustration:** an Istanbul skyline (Galata Tower, Bosphorus Bridge, mosque silhouettes), Iznik-inspired cover patterns for journal posts and the procedural scalp/beard/brow artwork.
+- **Motion:** shared Framer Motion variants for scroll reveals, staggered grids, floating cards, spring modals and page transitions; `prefers-reduced-motion` turns them off.
+
+### Screens
+
+| Home & treatments | Treatment detail |
+|---|---|
+| ![Mega menu](docs/screenshots/mega-menu.jpg) | ![Treatment detail page](docs/screenshots/treatment-detail.jpg) |
+| **Before / after gallery** | **Packages & comparison** |
+| ![Gallery](docs/screenshots/gallery.jpg) | ![Packages](docs/screenshots/packages.jpg) |
+| **Consultation wizard** | **Journal article** |
+| ![Booking wizard](docs/screenshots/booking-wizard.jpg) | ![Journal article](docs/screenshots/journal-article.jpg) |
+| **Arabic (RTL)** | **Turkish** |
+| ![Arabic RTL home](docs/screenshots/arabic-rtl.jpg) | ![Turkish treatments page](docs/screenshots/turkish-services.jpg) |
+
+**Mobile** (home, Arabic treatment page, case details, Turkish booking wizard, navigation drawer):
+
+![Mobile screens](docs/screenshots/mobile-screens.jpg)
+
+<details>
+<summary>Full home page</summary>
+
+![Full home page](docs/screenshots/home-full.jpg)
+
+</details>
+
+### UX details
+
+- **Navigation:** sticky header that turns from transparent to frosted glass on scroll, a treatments mega menu grouped by category with prices, and a full-height mobile drawer with the language switcher.
+- **Conversion paths:** quick booking modal (opens pre-filled with the treatment you came from), a 5-step wizard with progress, inline validation and an editable summary, plus WhatsApp deep links with a pre-written message and the booking reference.
+- **Content structure:** treatment pages follow a fixed pattern (intro, how it works, benefits vs. candidates, procedure steps, FAQ) with a sticky table of contents and a sticky price card; articles add a reading-progress bar, author card and related posts.
+- **Accessibility:** semantic landmarks, skip link, visible focus rings, `aria` states on menus, tabs and accordions, focus moved into and restored from dialogs, Escape to close, keyboard-operable before/after slider.
+- **States:** loading, empty search results, form errors, success screens with a reference number, and a clear demo-mode notice when no backend is connected.
+
+---
+
+## Database
+
+PostgreSQL schema managed with Prisma ([`backend/prisma/schema.prisma`](backend/prisma/schema.prisma)). Content tables keep language-neutral fields (slug, price, ordering, flags) and store copy in a `*_translations` table with one row per locale; the API returns the requested locale and falls back to English.
+
+```mermaid
+erDiagram
+    USER ||--o{ APPOINTMENT : "books"
+    USER ||--o{ REFRESH_TOKEN : "signs in with"
+    USER ||--o{ MEDIA : "uploads"
+    SERVICE ||--o{ SERVICE_TRANSLATION : "translated as"
+    SERVICE ||--o{ GALLERY_CASE : "showcased in"
+    SERVICE ||--o{ APPOINTMENT : "requested for"
+    GALLERY_CASE ||--o{ GALLERY_CASE_TRANSLATION : "translated as"
+    TEAM_MEMBER ||--o{ TEAM_MEMBER_TRANSLATION : "translated as"
+    TEAM_MEMBER ||--o{ BLOG_POST : "writes"
+    BLOG_POST ||--o{ BLOG_POST_TRANSLATION : "translated as"
+    PACKAGE ||--o{ PACKAGE_TRANSLATION : "translated as"
+
+    USER {
+        uuid id PK
+        string phone UK
+        string email UK
+        string googleId UK
+        enum role "ADMIN EDITOR DOCTOR RECEPTIONIST PATIENT"
+        enum provider "PHONE GOOGLE PASSWORD"
+        enum locale "en tr ar"
+        bool isActive
+    }
+    REFRESH_TOKEN {
+        uuid id PK
+        uuid userId FK
+        string tokenHash UK
+        datetime expiresAt
+        datetime revokedAt
+    }
+    OTP_CODE {
+        uuid id PK
+        string phone
+        string codeHash
+        int attempts
+        datetime expiresAt
+        datetime consumedAt
+    }
+    SERVICE {
+        uuid id PK
+        string slug UK
+        string category
+        int priceFrom
+        json facts
+        bool isFeatured
+    }
+    SERVICE_TRANSLATION {
+        uuid serviceId FK
+        enum locale
+        string title
+        text intro
+        json sections
+        json faqs
+    }
+    GALLERY_CASE {
+        uuid id PK
+        string slug UK
+        uuid serviceId FK
+        int grafts
+        int monthsAfter
+        int severity
+        int seed
+    }
+    GALLERY_CASE_TRANSLATION {
+        uuid caseId FK
+        enum locale
+        string highlight
+        string[] tags
+    }
+    TEAM_MEMBER {
+        uuid id PK
+        string slug UK
+        string name
+        int years
+        string[] languages
+    }
+    TEAM_MEMBER_TRANSLATION {
+        uuid memberId FK
+        enum locale
+        string role
+        text bio
+    }
+    BLOG_POST {
+        uuid id PK
+        string slug UK
+        string category
+        uuid authorId FK
+        datetime publishedAt
+        bool isPublished
+    }
+    BLOG_POST_TRANSLATION {
+        uuid postId FK
+        enum locale
+        string title
+        json sections
+    }
+    PACKAGE {
+        uuid id PK
+        string slug UK
+        int priceFrom
+        string technique
+        string[] includes
+    }
+    PACKAGE_TRANSLATION {
+        uuid packageId FK
+        enum locale
+        string name
+        string tagline
+    }
+    APPOINTMENT {
+        uuid id PK
+        string reference UK
+        uuid userId FK
+        uuid serviceId FK
+        string phone
+        enum contactChannel "WHATSAPP PHONE EMAIL"
+        enum status "PENDING CONFIRMED COMPLETED CANCELED"
+        datetime preferredDate
+    }
+    LEAD {
+        uuid id PK
+        string reference UK
+        string email
+        string subject
+        enum status "NEW CONTACTED CLOSED"
+    }
+    FAQ {
+        uuid id PK
+        enum locale
+        string category
+        text answer
+    }
+    TESTIMONIAL {
+        uuid id PK
+        enum locale
+        string patientName
+        int rating
+    }
+    MEDIA {
+        uuid id PK
+        string url
+        string mimeType
+        uuid uploadedById FK
+    }
+    SITE_SETTING {
+        int id PK
+        json data
+    }
+```
+
+| Table | Purpose | Notes |
+|---|---|---|
+| `users` | Patients and clinic staff | Unique phone, email and Google id; role-based access |
+| `otp_codes` | Phone sign-in codes | Codes stored as HMAC, 5-minute expiry, attempt counter, indexed by phone + time |
+| `refresh_tokens` | Long-lived sessions | Stored hashed, single-use and rotated on every refresh |
+| `services` + `service_translations` | Treatments | Facts (duration, grafts, recovery) as JSON; page sections and FAQ per locale |
+| `gallery_cases` + translations | Before/after cases | Graft count, months after, severity and seed drive the generated illustration |
+| `team_members` + translations | Doctors and patient care team | Linked to journal posts as authors |
+| `blog_posts` + translations | Journal | Indexed by category, published flag and date |
+| `packages` + translations | All-inclusive packages | Included features stored as keys and translated in the UI |
+| `faqs`, `testimonials` | FAQ and reviews | One row per locale, ordered by `sortOrder` |
+| `appointments` | Consultation requests | Human-readable `NV-…` reference, optional link to a user, indexed by status/date and phone |
+| `leads` | Contact form messages | `MSG-…` reference and workflow status |
+| `media` | Uploaded images | Served from `/uploads` |
+| `site_settings` | Clinic contact details, hours, socials | Single row, JSON |
+
+- **Migrations:** [`backend/prisma/migrations`](backend/prisma/migrations), applied with `npx prisma migrate deploy`.
+- **Seed:** [`backend/prisma/seed.js`](backend/prisma/seed.js) loads services, cases, team, journal, packages, FAQ, reviews and settings for all three languages from the same files the website uses. It is idempotent, so it can be re-run after content edits.
 
 ---
 
@@ -147,6 +386,13 @@ All content endpoints accept `?lang=en|tr|ar`. Responses use `{ status: "ok", da
 2. Edit treatments, prices and cases in `frontend/src/content/shared/*` and the copy in `frontend/src/locales/*`.
 3. Replace the demo disclaimer in the footer strings and add real photos where appropriate.
 4. Configure `VITE_API_URL`, `GOOGLE_CLIENT_ID` and an SMS provider in `backend/src/utils/smsProvider.js`.
+
+## Credits
+
+Designed and developed by **[Renix.dev](https://renix.dev/en)**: we design, build and ship web platforms, mobile apps and automation.
+Follow us on [LinkedIn](https://www.linkedin.com/company/renix-dev/).
+
+![Studio credit in the site footer](docs/screenshots/footer-credit.jpg)
 
 ## License
 

@@ -4,6 +4,13 @@
 // NOTE: Nuvela is a fictional clinic created for a portfolio demo.
 // Replace every value below with the real clinic's details before going live.
 
+// Studio that designed and built the website (shown in the footer credit).
+export const STUDIO = {
+  name: "Renix.dev",
+  url: "https://renix.dev/en",
+  linkedin: "https://www.linkedin.com/company/renix-dev/",
+};
+
 export const SITE = {
   name: "Nuvela Hair Clinic",
   shortName: "Nuvela",
