@@ -1,0 +1,410 @@
+// Nuvela Hair Clinic database schema (PostgreSQL).
+// Content tables keep language-neutral fields on the main model and localized
+// copy in a *Translation table keyed by (entity, locale).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  DOCTOR
+  RECEPTIONIST
+  PATIENT
+}
+
+enum Locale {
+  en
+  tr
+  ar
+}
+
+enum AuthProvider {
+  PHONE
+  GOOGLE
+  PASSWORD
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+enum ContactChannel {
+  WHATSAPP
+  PHONE
+  EMAIL
+}
+
+// --- Users & auth -----------------------------------------------------------
+
+model User {
+  id           String       @id @default(uuid())
+  phone        String?      @unique
+  email        String?      @unique
+  fullName     String?
+  avatarUrl    String?
+  role         Role         @default(PATIENT)
+  provider     AuthProvider @default(PHONE)
+  googleId     String?      @unique
+  passwordHash String?
+  locale       Locale       @default(en)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  appointments  Appointment[]
+  refreshTokens RefreshToken[]
+  media         Media[]
+
+  @@map("users")
+}
+
+model OtpCode {
+  id         String    @id @default(uuid())
+  phone      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, createdAt])
+  @@map("otp_codes")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// --- Services ---------------------------------------------------------------
+
+model Service {
+  id         String   @id @default(uuid())
+  slug       String   @unique
+  category   String
+  icon       String
+  art        String
+  sortOrder  Int      @default(0)
+  isFeatured Boolean  @default(false)
+  isPopular  Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  priceFrom  Int
+  priceUnit  String?
+  currency   String   @default("EUR")
+  facts      Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  translations ServiceTranslation[]
+  cases        GalleryCase[]
+  appointments Appointment[]
+
+  @@index([category, isActive])
+  @@map("services")
+}
+
+model ServiceTranslation {
+  id              String @id @default(uuid())
+  serviceId       String
+  locale          Locale
+  title           String
+  shortTitle      String
+  tagline         String
+  summary         String
+  intro           String @db.Text
+  sections        Json
+  benefits        Json
+  candidates      Json
+  steps           Json
+  faqs            Json
+  metaTitle       String
+  metaDescription String
+
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, locale])
+  @@map("service_translations")
+}
+
+// --- Gallery ----------------------------------------------------------------
+
+model GalleryCase {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  serviceId   String
+  art         String
+  grafts      Int
+  age         Int?
+  gender      String?
+  country     String?
+  monthsAfter Int
+  severity    Int      @default(3)
+  seed        Int      @default(1)
+  isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  service      Service                  @relation(fields: [serviceId], references: [id])
+  translations GalleryCaseTranslation[]
+
+  @@index([serviceId, isPublished])
+  @@map("gallery_cases")
+}
+
+model GalleryCaseTranslation {
+  id        String   @id @default(uuid())
+  caseId    String
+  locale    Locale
+  highlight String
+  tags      String[]
+
+  case GalleryCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, locale])
+  @@map("gallery_case_translations")
+}
+
+// --- Team -------------------------------------------------------------------
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  initials  String
+  years     Int
+  languages String[]
+  hue       Int      @default(180)
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  translations TeamMemberTranslation[]
+  posts        BlogPost[]
+
+  @@map("team_members")
+}
+
+model TeamMemberTranslation {
+  id          String   @id @default(uuid())
+  memberId    String
+  locale      Locale
+  role        String
+  bio         String   @db.Text
+  specialties String[]
+
+  member TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, locale])
+  @@map("team_member_translations")
+}
+
+// --- Journal ----------------------------------------------------------------
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  category    String
+  theme       String   @default("turquoise")
+  icon        String   @default("sparkle")
+  readTime    Int      @default(5)
+  isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  publishedAt DateTime
+  authorId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author       TeamMember?           @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  translations BlogPostTranslation[]
+
+  @@index([category, isPublished, publishedAt])
+  @@map("blog_posts")
+}
+
+model BlogPostTranslation {
+  id              String  @id @default(uuid())
+  postId          String
+  locale          Locale
+  title           String
+  excerpt         String
+  sections        Json
+  faqs            Json?
+  metaTitle       String?
+  metaDescription String?
+
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, locale])
+  @@map("blog_post_translations")
+}
+
+// --- Packages ---------------------------------------------------------------
+
+model Package {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  priceFrom   Int
+  currency    String   @default("EUR")
+  technique   String
+  includes    String[]
+  isPopular   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  translations PackageTranslation[]
+
+  @@map("packages")
+}
+
+model PackageTranslation {
+  id        String @id @default(uuid())
+  packageId String
+  locale    Locale
+  name      String
+  tagline   String
+
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, locale])
+  @@map("package_translations")
+}
+
+// --- FAQ & testimonials (one row per locale) ---------------------------------
+
+model Faq {
+  id        String   @id @default(uuid())
+  locale    Locale
+  category  String
+  question  String
+  answer    String   @db.Text
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([locale, category, isActive])
+  @@map("faqs")
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  locale      Locale
+  patientName String
+  country     String?
+  rating      Int      @default(5)
+  serviceSlug String?
+  content     String   @db.Text
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([locale, isPublished])
+  @@map("testimonials")
+}
+
+// --- Bookings & leads ----------------------------------------------------------
+
+model Appointment {
+  id                 String            @id @default(uuid())
+  reference          String            @unique
+  userId             String?
+  serviceId          String?
+  fullName           String
+  phone              String
+  email              String?
+  country            String?
+  contactChannel     ContactChannel    @default(WHATSAPP)
+  preferredDate      DateTime?
+  companions         Int?
+  airport            String?
+  concern            String?
+  hairLossDuration   String?
+  previousTransplant Boolean?
+  note               String?           @db.Text
+  source             String?
+  locale             Locale            @default(en)
+  status             AppointmentStatus @default(PENDING)
+  adminNote          String?           @db.Text
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@map("appointments")
+}
+
+model Lead {
+  id        String     @id @default(uuid())
+  reference String     @unique
+  fullName  String
+  email     String
+  phone     String?
+  subject   String
+  message   String     @db.Text
+  locale    Locale     @default(en)
+  status    LeadStatus @default(NEW)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([status, createdAt])
+  @@map("leads")
+}
+
+// --- Media & settings -------------------------------------------------------
+
+model Media {
+  id           String   @id @default(uuid())
+  url          String
+  fileName     String
+  mimeType     String
+  size         Int
+  alt          String?
+  uploadedById String?
+  createdAt    DateTime @default(now())
+
+  uploadedBy User? @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@map("media")
+}
+
+model SiteSetting {
+  id        Int      @id @default(1)
+  data      Json
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
