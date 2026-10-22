@@ -240,7 +240,7 @@ erDiagram
 | `otp_codes` | Phone sign-in codes | Codes stored as HMAC, 5-minute expiry, attempt counter, indexed by phone + time |
 | `refresh_tokens` | Long-lived sessions | Stored hashed, single-use and rotated on every refresh |
 | `services` + `service_translations` | Treatments | Facts (duration, grafts, recovery) as JSON; page sections and FAQ per locale |
-| `gallery_cases` + translations | Before/after cases | Graft count, months after, severity and seed drive the generated illustration |
+| `gallery_cases` + translations | Before/after cases | Graft count, months after, severity and seed decide how the illustration is drawn |
 | `team_members` + translations | Doctors and patient care team | Linked to journal posts as authors |
 | `blog_posts` + translations | Journal | Indexed by category, published flag and date |
 | `packages` + translations | All-inclusive packages | Included features stored as keys and translated in the UI |
